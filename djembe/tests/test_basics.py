@@ -10,11 +10,9 @@ from M2Crypto import X509
 
 
 class EncryptionTest(TestCase):
-
     def setUp(self):
         self.recipient1 = Identity.objects.create(
-            certificate=data.RECIPIENT1_CERTIFICATE,
-            key=data.RECIPIENT1_KEY
+            certificate=data.RECIPIENT1_CERTIFICATE, key=data.RECIPIENT1_KEY
         )
 
         self.recipient2 = Identity.objects.create(
@@ -22,17 +20,15 @@ class EncryptionTest(TestCase):
         )
 
         self.list_member = Identity.objects.create(
-            certificate=data.RECIPIENT1_CERTIFICATE,
-            address='list@example.com'
+            certificate=data.RECIPIENT1_CERTIFICATE, address="list@example.com"
         )
 
         self.list_member = Identity.objects.create(
-            certificate=data.RECIPIENT2_CERTIFICATE,
-            address='list@example.com'
+            certificate=data.RECIPIENT2_CERTIFICATE, address="list@example.com"
         )
 
-        self.text_template = 'S/MIME multipart test %s'
-        self.html_template = '<h1>S/MIME Test</h1><p>Message <strong>%s</strong></p>'
+        self.text_template = "S/MIME multipart test %s"
+        self.html_template = "<h1>S/MIME Test</h1><p>Message <strong>%s</strong></p>"
 
     def testAllTheThings(self):
         """
@@ -42,17 +38,14 @@ class EncryptionTest(TestCase):
         recipients with no Identity records get plain text.
         """
         count = 1
-        sender = Identity.objects.get(address='recipient1@example.com')
+        sender = Identity.objects.get(address="recipient1@example.com")
         recipients = [identity.address for identity in Identity.objects.all()]
-        recipients.extend([
-            'recipient3@example.com',
-            'recipient4@example.com'
-        ])
+        recipients.extend(["recipient3@example.com", "recipient4@example.com"])
         message = mail.EmailMultiAlternatives(
             self.text_template % count,
             self.text_template % count,
             sender.address,
-            recipients
+            recipients,
         )
         message.attach_alternative(self.html_template % count, "text/html")
         message.send()
@@ -81,11 +74,11 @@ class EncryptionTest(TestCase):
         #
         # recipient 1
         #
-        recipient1_cert = BIO.MemoryBuffer(data.RECIPIENT1_CERTIFICATE)
-        recipient1_key = BIO.MemoryBuffer(data.RECIPIENT1_KEY)
+        recipient1_cert = BIO.MemoryBuffer(data.RECIPIENT1_CERTIFICATE.encode("UTF-8"))
+        recipient1_key = BIO.MemoryBuffer(data.RECIPIENT1_KEY.encode("UTF-8"))
         s.load_key_bio(recipient1_key, recipient1_cert)
 
-        msg = BIO.MemoryBuffer(backend.messages[1]['message'])
+        msg = BIO.MemoryBuffer(backend.messages[1]["message"].encode("UTF-8"))
         p7, msg_data = SMIME.smime_load_pkcs7_bio(msg)
         out = s.decrypt(p7)
 
@@ -98,11 +91,11 @@ class EncryptionTest(TestCase):
         #
         # recipient 2
         #
-        recipient2_cert = BIO.MemoryBuffer(data.RECIPIENT2_CERTIFICATE)
-        recipient2_key = BIO.MemoryBuffer(data.RECIPIENT2_KEY)
+        recipient2_cert = BIO.MemoryBuffer(data.RECIPIENT2_CERTIFICATE.encode("UTF-8"))
+        recipient2_key = BIO.MemoryBuffer(data.RECIPIENT2_KEY.encode("UTF-8"))
         s.load_key_bio(recipient2_key, recipient2_cert)
 
-        msg = BIO.MemoryBuffer(backend.messages[1]['message'])
+        msg = BIO.MemoryBuffer(backend.messages[1]["message"].encode("UTF-8"))
         p7, msg_data = SMIME.smime_load_pkcs7_bio(msg)
         out = s.decrypt(p7)
 
@@ -112,10 +105,10 @@ class EncryptionTest(TestCase):
         self.assertTrue(s.verify(p7, msg_data))
 
         # verify that the plaintext also got through
-        msg = BIO.MemoryBuffer(backend.messages[1]['message'])
+        msg = BIO.MemoryBuffer(backend.messages[1]["message"].encode("UTF-8"))
 
     def testEncryptedDeliveryProblem(self):
-        subject = 'No! Not the radio!'
+        subject = "No! Not the radio!"
         body = "10-4 good buddy!"
         sender = "breakerbreaker@example.com"
         recipient = "recipient1@example.com"
@@ -127,14 +120,17 @@ class EncryptionTest(TestCase):
             pass
 
     def testIdentityInstance(self):
-        self.assertEqual('C6:AF:98:41:75:D4:10:E9:BE:0A:5C:D8:7F:0E:6F:BB:A7:E1:B0:0E', self.recipient1.fingerprint)
+        self.assertEqual(
+            "C6:AF:98:41:75:D4:10:E9:BE:0A:5C:D8:7F:0E:6F:BB:A7:E1:B0:0E",
+            self.recipient1.fingerprint,
+        )
 
     def testMixedMessages(self):
         message1 = mail.message.EmailMessage(
-            subject='This is a poison message.',
+            subject="This is a poison message.",
             body="And will cause an exception.",
             from_email="breakerbreaker@example.com",
-            to=["somebody@example.com", "recipient1@example.com"]
+            to=["somebody@example.com", "recipient1@example.com"],
         )
 
         backend = mail.get_connection()
@@ -148,8 +144,10 @@ class EncryptionTest(TestCase):
     def testNoMessageToEncrypt(self):
         backend = mail.get_connection()
         try:
-            backend.encrypt('recipient1@example.com', ['recipient2@example.com'], '')
-            self.fail('Lack of recipients should have raised an exception from encrypt method.')
+            backend.encrypt("recipient1@example.com", ["recipient2@example.com"], "")
+            self.fail(
+                "Lack of recipients should have raised an exception from encrypt method."
+            )
         except ValueError:
             pass
 
@@ -161,13 +159,15 @@ class EncryptionTest(TestCase):
     def testNoRecipientsToEncrypt(self):
         backend = mail.get_connection()
         try:
-            backend.encrypt('recipient1@example.com', [], '')
-            self.fail('Lack of recipients should have raised an exception from encrypt method.')
+            backend.encrypt("recipient1@example.com", [], "")
+            self.fail(
+                "Lack of recipients should have raised an exception from encrypt method."
+            )
         except ValueError:
             pass
 
     def testPlainTextDeliveryProblem(self):
-        subject = 'This is a poison message.'
+        subject = "This is a poison message."
         body = "And will cause an exception."
         sender = "breakerofthings@example.com"
         recipient = "deadletteroffice@example.com"
@@ -183,17 +183,17 @@ class EncryptionTest(TestCase):
 
         # should get an error with no address
         try:
-            sender = backend.get_sender_identity('')
-            self.fail('Lack of sender address should have raised an exception')
+            sender = backend.get_sender_identity("")
+            self.fail("Lack of sender address should have raised an exception")
         except ValueError:
             pass
 
         # a single valid sender should return a valid Identity
-        sender_address = 'multisender@example.com'
+        sender_address = "multisender@example.com"
         Identity.objects.create(
             certificate=data.RECIPIENT1_CERTIFICATE,
             key=data.RECIPIENT1_KEY,
-            address=sender_address
+            address=sender_address,
         )
         sender = backend.get_sender_identity(sender_address)
         self.assertTrue(sender is not None)
@@ -204,7 +204,7 @@ class EncryptionTest(TestCase):
         Identity.objects.create(
             certificate=data.RECIPIENT1_CERTIFICATE,
             key=data.RECIPIENT1_KEY,
-            address=sender_address
+            address=sender_address,
         )
         sender = backend.get_sender_identity(sender_address)
         self.assertTrue(sender is None)

@@ -1,10 +1,11 @@
 from setuptools import setup
 
-djembe = __import__('djembe')
+djembe = __import__("djembe")
 
-with open('README.rst') as file:
+with open("README.rst") as file:
     long_description = file.read()
 
+# fmt: off
 setup(
     author='John Hensley',
     author_email='john@cabincode.com',
@@ -22,7 +23,7 @@ setup(
     description=djembe.__doc__,
     long_description=long_description,
     install_requires=[
-        'Django>=1.6',
+        'Django==1.8.19',
         'M2Crypto',
         'South',
     ],
@@ -39,13 +40,14 @@ setup(
         ],
     },
     tests_require=[
-        'Django>=1.6',
+        'Django==1.8.19',
         'M2Crypto',
         'South',
         'coverage',
-        'django_coverage'
+        'django_coverage',
     ],
     test_suite='tests.main',
-    url='http://github.com/cabincode/django-djembe',
+    url='http://github.com/lsbrillant/django-djembe',
     version=djembe.get_version(),
 )
+# fmt: on

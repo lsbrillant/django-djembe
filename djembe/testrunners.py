@@ -1,10 +1,13 @@
 from django.core import mail
 from django.conf import settings
 
-from django_coverage.coverage_runner import CoverageRunner
+from django.test.runner import DiscoverRunner
+
+# from django_coverage.coverage_runner import CoverageRunner
 
 
-class TestSuiteRunner(CoverageRunner):
+##class TestSuiteRunner(CoverageRunner):
+class TestSuiteRunner(DiscoverRunner):
     """
     Just resets EMAIL_BACKEND to whatever was specified in settings.
     """
