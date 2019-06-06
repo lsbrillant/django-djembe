@@ -25,7 +25,6 @@ setup(
     install_requires=[
         'Django==1.8.19',
         'M2Crypto',
-        'South',
     ],
     name='django-djembe',
     packages=[
@@ -42,7 +41,6 @@ setup(
     tests_require=[
         'Django==1.8.19',
         'M2Crypto',
-        'South',
         'coverage',
         'django_coverage',
     ],
