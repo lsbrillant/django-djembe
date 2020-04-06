@@ -23,7 +23,7 @@ setup(
     description=djembe.__doc__,
     long_description=long_description,
     install_requires=[
-        'Django==3.0.1',
+        'Django==3.0.*',
         'M2Crypto',
     ],
     name='django-djembe',
